@@ -34,6 +34,23 @@ class DeviceInfo(BaseModel):
         }}
 
 
+class OSInfo(BaseModel):
+    android_version: str = Field(..., example="13")
+    sdk: int = Field(..., example=33)
+    security_patch: str = Field(..., example="2024-12-01")
+    build_id: str = Field(..., example="TP1A.220624.014")
+    kernel_version: str = Field(..., example="5.10.0-android13-123456")
+
+    class Config:
+        json_schema_extra = {"example": {
+            "android_version": "13",
+            "sdk": 33,
+            "security_patch": "2024-12-01",
+            "build_id": "TP1A.220624.014",
+            "kernel_version": "5.10.0-android13-123456"
+        }}
+
+
 class CPUInfo(BaseModel):
     cores: int = Field(..., example=8)
     abi: str = Field(..., example="arm64-v8a")
@@ -104,6 +121,7 @@ class RealTimeMetrics(BaseModel):
 
 class SystemInfo(BaseModel):
     device: DeviceInfo
+    os: OSInfo
     cpu: CPUInfo
     cpu_frequency: CPUFrequency
     memory: MemoryInfo
@@ -174,6 +192,7 @@ async def root():
         "endpoints": {
             "health": "/health",
             "device": "/device",
+            "os": "/os",
             "cpu": "/cpu",
             "memory": "/memory",
             "storage": "/storage",
@@ -205,6 +224,22 @@ async def device_info():
         )
     except Exception as e:
         logger.error(f"Device info error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/os", response_model=OSInfo, tags=["Device"])
+async def os_info():
+    """Get operating system information (Android version, SDK, patch level, build, kernel)."""
+    try:
+        return OSInfo(
+            android_version=adb_shell("getprop ro.build.version.release"),
+            sdk=int(adb_shell("getprop ro.build.version.sdk")),
+            security_patch=adb_shell("getprop ro.build.version.security_patch"),
+            build_id=adb_shell("getprop ro.build.display.id"),
+            kernel_version=adb_shell("uname -r"),
+        )
+    except Exception as e:
+        logger.error(f"OS info error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -414,6 +449,7 @@ async def system_info():
     """
     try:
         device = await device_info()
+        osinfo = await os_info()
         cpu = await cpu_info()
         cpu_freq = await cpu_frequency()
         memory = await memory_info()
@@ -423,6 +459,7 @@ async def system_info():
         
         return SystemInfo(
             device=device,
+            os=osinfo,
             cpu=cpu,
             cpu_frequency=cpu_freq,
             memory=memory,

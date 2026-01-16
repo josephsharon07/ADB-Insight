@@ -383,6 +383,32 @@
                 <div class="timestamp" id="deviceTimestamp"></div>
             </div>
 
+            <!-- OS Card -->
+            <div class="card">
+                <div class="card-title">🛠️ OS Information</div>
+                <div class="info-row">
+                    <span class="info-label">Android Version</span>
+                    <span class="info-value" id="osVersion">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">SDK</span>
+                    <span class="info-value" id="osSdk">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Security Patch</span>
+                    <span class="info-value" id="osPatch">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Build ID</span>
+                    <span class="info-value" id="osBuild">—</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Kernel</span>
+                    <span class="info-value" id="osKernel">—</span>
+                </div>
+                <div class="timestamp" id="osTimestamp"></div>
+            </div>
+
             <!-- CPU Card -->
             <div class="card">
                 <div class="card-title">⚙️ CPU Information</div>
@@ -729,10 +755,30 @@
             }
         }
 
+        // Fetch and display OS info
+        async function fetchOS() {
+            try {
+                const response = await fetch(`${API_URL}/os`);
+                const data = await response.json();
+
+                document.getElementById('osVersion').textContent = data.android_version;
+                document.getElementById('osSdk').textContent = data.sdk;
+                document.getElementById('osPatch').textContent = data.security_patch || '—';
+                document.getElementById('osBuild').textContent = data.build_id || '—';
+                document.getElementById('osKernel').textContent = data.kernel_version || '—';
+
+                lastUpdateTime.os = new Date().toLocaleTimeString();
+                document.getElementById('osTimestamp').textContent = `Last updated: ${lastUpdateTime.os}`;
+            } catch (e) {
+                console.error('OS fetch error:', e);
+            }
+        }
+
         // Refresh all data
         function refreshAll() {
             checkHealth();
             fetchDevice();
+            fetchOS();
             fetchCPU();
             fetchCPUFrequency();
             fetchMemory();
