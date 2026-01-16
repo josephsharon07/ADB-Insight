@@ -19,11 +19,39 @@ def parse_cpu_freq(text: str):
         if ":" in line:
             path, value = line.split(":", 1)
             try:
-                cpu = path.split("/")[-2]
-                freqs[cpu] = int(value.strip())
+                # Extract cpu number from path like /sys/devices/system/cpu/cpu0/...
+                parts = path.split("/")
+                cpu_part = [p for p in parts if p.startswith("cpu")]
+                if cpu_part:
+                    cpu_num = cpu_part[0]  # e.g., "cpu0"
+                    freqs[cpu_num] = int(value.strip())
             except (ValueError, IndexError):
                 continue
     return freqs if freqs else {"error": "Could not parse CPU frequencies"}
+
+
+def parse_cpu_frequencies_detailed(text: str) -> dict:
+    """Parse CPU frequencies with min/max calculations."""
+    freqs = parse_cpu_freq(text)
+    
+    if "error" in freqs:
+        return freqs
+    
+    # Extract numeric frequencies only
+    freq_values = [f for f in freqs.values() if isinstance(f, int)]
+    
+    if not freq_values:
+        return {"error": "No valid frequencies found"}
+    
+    return {
+        "per_core": freqs,
+        "min_khz": min(freq_values),
+        "max_khz": max(freq_values),
+        "min_mhz": round(min(freq_values) / 1000, 2),
+        "max_mhz": round(max(freq_values) / 1000, 2),
+        "avg_mhz": round(sum(freq_values) / len(freq_values) / 1000, 2),
+        "core_count": len(freq_values)
+    }
 
 
 def parse_thermal_data(text: str):

@@ -1,4 +1,4 @@
-# Android System API (ADB) v2.0
+# Android System API (ADB) v2.1
 
 Expose Android system information via HTTP using **ADB + FastAPI**.
 No root. No Android app. Pure system metrics.
@@ -13,6 +13,9 @@ No root. No Android app. Pure system metrics.
 - ✅ **Health checks**: ADB connection monitoring
 - ✅ **Timestamps**: All responses include timestamps
 - ✅ **Calculated metrics**: Usage percentages, averages, min/max
+- ✅ **WebSocket streaming**: Real-time metrics via ws:// 
+- ✅ **Per-core CPU**: Individual frequency for each core
+- ✅ **CPU min/max**: Frequency statistics across cores
 
 ---
 
@@ -46,6 +49,8 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
 - **Swagger UI**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
 - **API Root**: http://localhost:8000/
+- **WebSocket Metrics**: ws://localhost:8000/ws/metrics
+- **WebSocket CPU**: ws://localhost:8000/ws/cpu
 
 ---
 

@@ -1,13 +1,14 @@
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, HTTPException, status, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 import logging
+import asyncio
 
 from adb_utils import adb_shell, adb_devices
 from parsers import (
-    parse_key_value_block, parse_cpu_freq, parse_thermal_data, 
+    parse_key_value_block, parse_cpu_freq, parse_cpu_frequencies_detailed, parse_thermal_data, 
     parse_battery_level, kb_to_mb, kb_to_gb
 )
 
@@ -41,8 +42,13 @@ class CPUInfo(BaseModel):
 
 
 class CPUFrequency(BaseModel):
-    frequencies_khz: Dict[str, int] = Field(..., example={"cpu0": 1800000, "cpu1": 1800000})
-    average_mhz: float = Field(..., example=1800.0)
+    per_core: Dict[str, int] = Field(..., example={"cpu0": 1800000, "cpu1": 1800000})
+    min_khz: int = Field(..., example=546000)
+    max_khz: int = Field(..., example=1800000)
+    min_mhz: float = Field(..., example=546.0)
+    max_mhz: float = Field(..., example=1800.0)
+    avg_mhz: float = Field(..., example=1173.25)
+    core_count: int = Field(..., example=8)
 
 
 class MemoryInfo(BaseModel):
@@ -82,6 +88,18 @@ class HealthStatus(BaseModel):
     status: str = Field(..., example="healthy")
     adb_connected: bool = Field(..., example=True)
     timestamp: datetime = Field(...)
+
+
+class RealTimeMetrics(BaseModel):
+    """Real-time system metrics for streaming."""
+    timestamp: datetime
+    battery_level: int
+    memory_usage_percent: float
+    storage_usage_percent: float
+    cpu_avg_mhz: float
+    cpu_max_mhz: float
+    cpu_min_mhz: float
+    thermal_max_temp: float
 
 
 class SystemInfo(BaseModel):
@@ -215,26 +233,28 @@ async def cpu_info():
 @app.get("/cpu/frequency", response_model=CPUFrequency, tags=["CPU"])
 async def cpu_frequency():
     """
-    Get real-time CPU frequency for each core.
+    Get real-time CPU frequency for each core with statistics.
     
-    Returns: frequencies in kHz with average calculation.
+    Returns: per-core frequencies in kHz, plus min, max, and average calculations.
     """
     try:
         raw = adb_shell(
             "for f in /sys/devices/system/cpu/cpu*/cpufreq/scaling_cur_freq; "
             "do echo $f: $(cat $f); done"
         )
-        freqs = parse_cpu_freq(raw)
+        freq_data = parse_cpu_frequencies_detailed(raw)
         
-        if "error" in freqs:
+        if "error" in freq_data:
             raise HTTPException(status_code=500, detail="Failed to parse CPU frequencies")
         
-        avg_freq = sum(freqs.values()) / len(freqs) if freqs else 0
-        avg_mhz = round(avg_freq / 1000, 2)
-        
         return CPUFrequency(
-            frequencies_khz=freqs,
-            average_mhz=avg_mhz
+            per_core=freq_data["per_core"],
+            min_khz=freq_data["min_khz"],
+            max_khz=freq_data["max_khz"],
+            min_mhz=freq_data["min_mhz"],
+            max_mhz=freq_data["max_mhz"],
+            avg_mhz=freq_data["avg_mhz"],
+            core_count=freq_data["core_count"]
         )
     except Exception as e:
         logger.error(f"CPU frequency error: {e}")
@@ -360,6 +380,106 @@ async def thermal_info():
     except Exception as e:
         logger.error(f"Thermal info error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============ WEBSOCKET REAL-TIME STREAMING ============
+@app.websocket("/ws/metrics")
+async def websocket_metrics(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time system metrics streaming.
+    
+    Sends battery, memory, storage, CPU, and thermal data every 2 seconds.
+    Connect: ws://localhost:8000/ws/metrics
+    """
+    await websocket.accept()
+    logger.info("WebSocket client connected for metrics")
+    
+    try:
+        while True:
+            try:
+                # Get current metrics
+                memory = await memory_info()
+                storage = await storage_info()
+                battery = await battery_info()
+                cpu_freq = await cpu_frequency()
+                thermal = await thermal_info()
+                
+                # Create real-time metrics object
+                metrics = RealTimeMetrics(
+                    timestamp=datetime.now(),
+                    battery_level=battery.level,
+                    memory_usage_percent=memory.usage_percent,
+                    storage_usage_percent=storage.usage_percent,
+                    cpu_avg_mhz=cpu_freq.avg_mhz,
+                    cpu_max_mhz=cpu_freq.max_mhz,
+                    cpu_min_mhz=cpu_freq.min_mhz,
+                    thermal_max_temp=thermal.max_temp_c
+                )
+                
+                # Send metrics as JSON
+                await websocket.send_json(metrics.model_dump(mode='json'))
+                
+                # Wait 2 seconds before next update
+                await asyncio.sleep(2)
+                
+            except Exception as e:
+                logger.error(f"Error collecting metrics: {e}")
+                await websocket.send_json({"error": str(e)})
+                await asyncio.sleep(2)
+                
+    except WebSocketDisconnect:
+        logger.info("WebSocket client disconnected")
+    except Exception as e:
+        logger.error(f"WebSocket error: {e}")
+        try:
+            await websocket.close(code=1000)
+        except:
+            pass
+
+
+@app.websocket("/ws/cpu")
+async def websocket_cpu(websocket: WebSocket):
+    """
+    WebSocket endpoint for real-time CPU frequency streaming.
+    
+    Sends per-core CPU frequencies, min, max, and average every 1 second.
+    Connect: ws://localhost:8000/ws/cpu
+    """
+    await websocket.accept()
+    logger.info("WebSocket client connected for CPU metrics")
+    
+    try:
+        while True:
+            try:
+                cpu_freq = await cpu_frequency()
+                
+                payload = {
+                    "timestamp": datetime.now().isoformat(),
+                    "per_core": cpu_freq.per_core,
+                    "min_mhz": cpu_freq.min_mhz,
+                    "max_mhz": cpu_freq.max_mhz,
+                    "avg_mhz": cpu_freq.avg_mhz,
+                    "core_count": cpu_freq.core_count
+                }
+                
+                await websocket.send_json(payload)
+                
+                # Update every 1 second for CPU
+                await asyncio.sleep(1)
+                
+            except Exception as e:
+                logger.error(f"Error collecting CPU metrics: {e}")
+                await websocket.send_json({"error": str(e)})
+                await asyncio.sleep(1)
+                
+    except WebSocketDisconnect:
+        logger.info("WebSocket CPU client disconnected")
+    except Exception as e:
+        logger.error(f"WebSocket CPU error: {e}")
+        try:
+            await websocket.close(code=1000)
+        except:
+            pass
 
 
 # ============ FULL SYSTEM ENDPOINT ============
