@@ -227,9 +227,120 @@ Get complete system information in a single request.
 
 ---
 
+## 🔌 WebSocket Real-Time Streaming
+
+### Metrics Stream
+
+**Endpoint**: `ws://localhost:8000/ws/metrics`
+
+Get real-time system metrics (battery, memory, storage, CPU, thermal) updated every 2 seconds.
+
+**Example (JavaScript):**
+```javascript
+const ws = new WebSocket('ws://localhost:8000/ws/metrics');
+
+ws.onmessage = (event) => {
+  const metrics = JSON.parse(event.data);
+  console.log(`Battery: ${metrics.battery_level}%`);
+  console.log(`Memory: ${metrics.memory_usage_percent.toFixed(1)}%`);
+  console.log(`CPU Avg: ${metrics.cpu_avg_mhz.toFixed(0)} MHz`);
+};
+```
+
+**Example (Python):**
+```python
+import asyncio
+import websockets
+import json
+
+async def stream_metrics():
+    async with websockets.connect('ws://localhost:8000/ws/metrics') as ws:
+        async for message in ws:
+            data = json.loads(message)
+            print(f"Battery: {data['battery_level']}%")
+            print(f"Memory: {data['memory_usage_percent']:.1f}%")
+```
+
+**Response:**
+```json
+{
+  "timestamp": "2026-01-16T10:30:45.123456",
+  "battery_level": 42,
+  "memory_usage_percent": 68.0,
+  "storage_usage_percent": 30.5,
+  "cpu_avg_mhz": 1173.25,
+  "cpu_max_mhz": 1800.0,
+  "cpu_min_mhz": 546.0,
+  "thermal_max_temp": 43.7
+}
+```
+
+### CPU Frequency Stream
+
+**Endpoint**: `ws://localhost:8000/ws/cpu`
+
+Get real-time per-core CPU frequencies updated every 1 second.
+
+**Example (Python):**
+```python
+import asyncio
+import websockets
+import json
+
+async def stream_cpu():
+    async with websockets.connect('ws://localhost:8000/ws/cpu') as ws:
+        async for message in ws:
+            data = json.loads(message)
+            print(f"CPU cores: {data['core_count']}")
+            print(f"Frequency range: {data['min_mhz']:.0f} - {data['max_mhz']:.0f} MHz")
+```
+
+**Response:**
+```json
+{
+  "timestamp": "2026-01-16T10:30:45.123456",
+  "per_core": {
+    "cpu0": 1800000,
+    "cpu1": 1800000,
+    "cpu2": 1200000,
+    "cpu3": 546000,
+    "cpu4": 546000,
+    "cpu5": 546000,
+    "cpu6": 546000,
+    "cpu7": 546000
+  },
+  "min_mhz": 546.0,
+  "max_mhz": 1800.0,
+  "avg_mhz": 1173.25,
+  "core_count": 8
+}
+```
+
+### WebSocket Client Tool
+
+Use the provided Python WebSocket client:
+
+```bash
+# Install dependencies
+pip install websockets
+
+# Stream metrics
+python3 websocket_client.py metrics
+
+# Stream CPU frequencies
+python3 websocket_client.py cpu
+
+# Connect to remote server
+python3 websocket_client.py metrics 10.10.10.48:8000
+```
+
+---
+
 ## 🎯 What This API Can Do
 
 ✅ CPU frequency (per-core real-time)  
+✅ CPU min/max/avg frequencies  
+✅ Individual core frequencies  
 ✅ RAM, Swap memory usage  
 ✅ Storage usage (/data partition)  
 ✅ Battery level, health, voltage, temperature  
@@ -237,6 +348,8 @@ Get complete system information in a single request.
 ✅ Device info (model, manufacturer, Android version)  
 ✅ Usage percentages and calculations  
 ✅ Timestamps on all responses  
+✅ Real-time WebSocket streaming  
+✅ Per-core CPU monitoring  
 
 ---
 
@@ -392,6 +505,16 @@ Free to use and modify.
 ---
 
 ## 🚀 Version History
+
+**v2.1.0** (Jan 2026)
+- WebSocket real-time streaming (/ws/metrics, /ws/cpu)
+- Enhanced CPU frequency endpoint (per-core, min/max/avg)
+- Per-core frequency parsing
+- CPU statistics (minimum, maximum, average)
+- Core count in frequency response
+- Python WebSocket client tool
+- Real-time metrics every 2 seconds
+- Real-time CPU frequency every 1 second
 
 **v2.0.0** (Jan 2026)
 - Pydantic models for type safety
