@@ -90,6 +90,40 @@
             padding-bottom: 10px;
         }
 
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 14px 16px;
+            box-shadow: 0 10px 24px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .summary-label {
+            font-size: 0.85em;
+            color: #777;
+            letter-spacing: 0.3px;
+        }
+
+        .summary-value {
+            font-size: 1.7em;
+            font-weight: 700;
+            color: #4f46e5;
+        }
+
+        .summary-sub {
+            font-size: 0.85em;
+            color: #999;
+        }
+
         .info-row {
             display: flex;
             justify-content: space-between;
@@ -348,6 +382,30 @@
                 </div>
             </div>
         </header>
+
+        <!-- Quick summary strip -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-label">Battery</div>
+                <div class="summary-value" id="summaryBattery">—%</div>
+                <div class="summary-sub" id="summaryBatterySub">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Memory Usage</div>
+                <div class="summary-value" id="summaryMemory">—%</div>
+                <div class="summary-sub" id="summaryMemorySub">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Storage Usage</div>
+                <div class="summary-value" id="summaryStorage">—%</div>
+                <div class="summary-sub" id="summaryStorageSub">—</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">CPU Avg</div>
+                <div class="summary-value" id="summaryCpu">— MHz</div>
+                <div class="summary-sub" id="summaryCpuSub">—</div>
+            </div>
+        </div>
 
         <div class="button-group">
             <button onclick="refreshAll()">🔄 Refresh Now</button>
@@ -645,6 +703,10 @@
                         coresContainer.appendChild(coreEl);
                     });
                 }
+
+                // Summary
+                document.getElementById('summaryCpu').textContent = `${data.avg_mhz.toFixed(0)} MHz`;
+                document.getElementById('summaryCpuSub').textContent = `Min ${data.min_mhz.toFixed(0)} / Max ${data.max_mhz.toFixed(0)} MHz`;
                 
                 lastUpdateTime.cpuFreq = new Date().toLocaleTimeString();
                 document.getElementById('cpuFreqTimestamp').textContent = `Last updated: ${lastUpdateTime.cpuFreq}`;
@@ -664,6 +726,10 @@
                 document.getElementById('memoryTotal').textContent = `${data.total_mb.toFixed(2)} MB`;
                 document.getElementById('memoryUsed').textContent = `${data.used_mb.toFixed(2)} MB`;
                 document.getElementById('memoryAvailable').textContent = `${data.available_mb.toFixed(2)} MB`;
+
+                // Summary
+                document.getElementById('summaryMemory').textContent = `${data.usage_percent.toFixed(1)}%`;
+                document.getElementById('summaryMemorySub').textContent = `${data.used_mb.toFixed(0)} / ${data.total_mb.toFixed(0)} MB`;
                 
                 lastUpdateTime.memory = new Date().toLocaleTimeString();
                 document.getElementById('memoryTimestamp').textContent = `Last updated: ${lastUpdateTime.memory}`;
@@ -683,6 +749,10 @@
                 document.getElementById('storageTotal').textContent = `${data.total_gb.toFixed(2)} GB`;
                 document.getElementById('storageUsed').textContent = `${data.used_gb.toFixed(2)} GB`;
                 document.getElementById('storageFree').textContent = `${data.free_gb.toFixed(2)} GB`;
+
+                // Summary
+                document.getElementById('summaryStorage').textContent = `${data.usage_percent.toFixed(1)}%`;
+                document.getElementById('summaryStorageSub').textContent = `${data.used_gb.toFixed(2)} / ${data.total_gb.toFixed(2)} GB`;
                 
                 lastUpdateTime.storage = new Date().toLocaleTimeString();
                 document.getElementById('storageTimestamp').textContent = `Last updated: ${lastUpdateTime.storage}`;
@@ -703,6 +773,10 @@
                 document.getElementById('batteryVoltage').textContent = `${data.voltage_mv} mV`;
                 document.getElementById('batteryTech').textContent = data.technology;
                 document.getElementById('batteryCharging').textContent = data.is_charging ? '🔌 Charging' : '🔋 Discharging';
+
+                // Summary
+                document.getElementById('summaryBattery').textContent = `${data.level}%`;
+                document.getElementById('summaryBatterySub').textContent = data.is_charging ? 'Charging' : 'Discharging';
                 
                 lastUpdateTime.battery = new Date().toLocaleTimeString();
                 document.getElementById('batteryTimestamp').textContent = `Last updated: ${lastUpdateTime.battery}`;
