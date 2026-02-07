@@ -1,0 +1,1305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DroidMetrics API Documentation</title>
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --secondary: #10B981;
+            --dark: #1F2937;
+            --light: #F9FAFB;
+            --border: #E5E7EB;
+            --text: #374151;
+            --code-bg: #F3F4F6;
+            --success: #10B981;
+            --warning: #F59E0B;
+            --danger: #EF4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--light);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 60px 0 80px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><rect width="100" height="100" fill="none"/><path d="M0 50 L50 0 L100 50 L50 100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+            background-size: 100px 100px;
+        }
+
+        header .container {
+            position: relative;
+            z-index: 1;
+        }
+
+        header h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        header .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.95;
+            margin-bottom: 30px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            margin-right: 10px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Navigation */
+        nav {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 30px;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--primary);
+        }
+
+        /* Main Content */
+        main {
+            padding: 60px 0;
+        }
+
+        section {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            margin-bottom: 30px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary);
+            display: inline-block;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            color: var(--dark);
+            margin: 30px 0 15px;
+        }
+
+        h4 {
+            font-size: 1.2rem;
+            color: var(--primary);
+            margin: 20px 0 10px;
+        }
+
+        /* Feature Grid */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: var(--light);
+            padding: 25px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .feature-card h4 {
+            margin-top: 0;
+            color: var(--primary);
+        }
+
+        .feature-card p {
+            color: var(--text);
+            margin: 0;
+        }
+
+        /* Code Blocks */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 15px 0;
+            position: relative;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-label {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .copy-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: background 0.3s;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        /* API Endpoint Cards */
+        .endpoint {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            transition: border-color 0.3s;
+        }
+
+        .endpoint:hover {
+            border-color: var(--primary);
+        }
+
+        .endpoint-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .method {
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .method.get {
+            background: #DBEAFE;
+            color: #1E40AF;
+        }
+
+        .endpoint-path {
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .endpoint-desc {
+            color: var(--text);
+            margin: 15px 0;
+            line-height: 1.7;
+        }
+
+        .response-example {
+            background: #F9FAFB;
+            border-left: 3px solid var(--secondary);
+            padding: 15px;
+            margin-top: 15px;
+            border-radius: 5px;
+        }
+
+        .response-label {
+            font-weight: 600;
+            color: var(--secondary);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th {
+            background: var(--primary);
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tr:hover {
+            background: var(--light);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 2px solid var(--border);
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--text);
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Quick Start Steps */
+        .steps {
+            counter-reset: step;
+        }
+
+        .step {
+            position: relative;
+            padding-left: 60px;
+            margin-bottom: 30px;
+        }
+
+        .step::before {
+            counter-increment: step;
+            content: counter(step);
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--dark);
+            color: white;
+            padding: 40px 0;
+            text-align: center;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            header .subtitle {
+                font-size: 1rem;
+            }
+
+            nav ul {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            section {
+                padding: 25px;
+            }
+
+            .endpoint-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        /* Utility Classes */
+        .mt-20 { margin-top: 20px; }
+        .mb-20 { margin-bottom: 20px; }
+        .text-center { text-align: center; }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid;
+        }
+
+        .alert-info {
+            background: #DBEAFE;
+            border-color: #3B82F6;
+            color: #1E40AF;
+        }
+
+        .alert-warning {
+            background: #FEF3C7;
+            border-color: #F59E0B;
+            color: #92400E;
+        }
+
+        .alert-success {
+            background: #D1FAE5;
+            border-color: #10B981;
+            color: #065F46;
+        }
+
+        .inline-code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: monospace;
+            font-size: 0.9em;
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <h1>🤖 DroidMetrics API</h1>
+            <p class="subtitle">Real-time Android System Monitoring via ADB</p>
+            <div>
+                <span class="badge">v2.0.0</span>
+                <span class="badge">No Root Required</span>
+                <span class="badge">No Android App</span>
+                <span class="badge">Python & C++</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="#introduction">Introduction</a></li>
+                <li><a href="#quickstart">Quick Start</a></li>
+                <li><a href="#endpoints">API Endpoints</a></li>
+                <li><a href="#examples">Examples</a></li>
+                <li><a href="#reference">Reference</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Introduction -->
+        <section id="introduction">
+            <h2>Introduction</h2>
+            <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 20px;">
+                DroidMetrics is a comprehensive HTTP API that exposes real-time Android device metrics via ADB (Android Debug Bridge). 
+                Monitor CPU frequency, memory usage, battery health, thermal sensors, and much more—all without root access or installing 
+                any Android application.
+            </p>
+
+            <div class="features">
+                <div class="feature-card">
+                    <h4>📱 Device Information</h4>
+                    <p>Model, manufacturer, Android version, SDK, hardware details</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⚡ CPU Metrics</h4>
+                    <p>Core count, frequencies, governors, idle states, architecture</p>
+                </div>
+                <div class="feature-card">
+                    <h4>💾 Memory & Storage</h4>
+                    <p>RAM usage, swap, storage capacity, mount breakdown</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔋 Battery & Power</h4>
+                    <p>Charge level, health, temperature, voltage, current draw</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🌡️ Thermal Monitoring</h4>
+                    <p>CPU, battery, skin temperatures, per-core readings</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🌐 Network & Display</h4>
+                    <p>WiFi info, carrier, network type, screen size, density</p>
+                </div>
+            </div>
+
+            <div class="alert alert-info">
+                <strong>✨ Key Features:</strong> OpenAPI schema support, typed responses with Pydantic models, 
+                built-in caching, CORS enabled, both Python (FastAPI) and C++ implementations available.
+            </div>
+        </section>
+
+        <!-- Quick Start -->
+        <section id="quickstart">
+            <h2>Quick Start</h2>
+            
+            <h3>Prerequisites</h3>
+            <ul style="line-height: 2; margin: 15px 0 15px 30px;">
+                <li>Python 3.9 or higher</li>
+                <li>ADB installed and available in PATH</li>
+                <li>Android device with USB debugging enabled</li>
+                <li>Device connected via USB or WiFi ADB</li>
+            </ul>
+
+            <div class="alert alert-warning">
+                <strong>⚠️ Important:</strong> Verify your device is connected by running <code class="inline-code">adb devices</code>. 
+                You should see your device listed with "device" status.
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <h4>Clone the Repository</h4>
+                    <pre><code>git clone https://github.com/yourusername/DroidMetrics.git
+cd DroidMetrics/Python</code></pre>
+                </div>
+
+                <div class="step">
+                    <h4>Install Dependencies</h4>
+                    <pre><code>pip install -r requirements.txt</code></pre>
+                    <p style="margin-top: 10px; color: #6B7280;">
+                        This installs FastAPI, uvicorn, and other required packages.
+                    </p>
+                </div>
+
+                <div class="step">
+                    <h4>Start the API Server</h4>
+                    <pre><code>uvicorn main:app --host 0.0.0.0 --port 8001 --reload</code></pre>
+                </div>
+
+                <div class="step">
+                    <h4>Access the Documentation</h4>
+                    <p>Open your browser and navigate to:</p>
+                    <ul style="margin: 15px 0 0 20px; line-height: 2;">
+                        <li><strong>Swagger UI:</strong> <a href="http://localhost:8001/docs" target="_blank">http://localhost:8001/docs</a></li>
+                        <li><strong>ReDoc:</strong> <a href="http://localhost:8001/redoc" target="_blank">http://localhost:8001/redoc</a></li>
+                        <li><strong>API Root:</strong> <a href="http://localhost:8001/" target="_blank">http://localhost:8001/</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="alert alert-success">
+                <strong>🎉 Success!</strong> Your API is now running. Try making a request: 
+                <code class="inline-code">curl http://localhost:8001/battery</code>
+            </div>
+        </section>
+
+        <!-- API Endpoints -->
+        <section id="endpoints">
+            <h2>API Endpoints</h2>
+
+            <h3>🏥 Health & Diagnostics</h3>
+            
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/health</span>
+                </div>
+                <p class="endpoint-desc">
+                    Check API health and ADB connection status. Returns the current timestamp and connection state.
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "status": "healthy",
+  "adb_connected": true,
+  "timestamp": "2026-02-07T10:30:45.123456"
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/</span>
+                </div>
+                <p class="endpoint-desc">
+                    API root endpoint listing all available endpoints with metadata.
+                </p>
+            </div>
+
+            <h3>📱 Device & OS Information</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/device</span>
+                </div>
+                <p class="endpoint-desc">
+                    Retrieve comprehensive device information including model, manufacturer, hardware platform, and board details.
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "model": "SM-F127G",
+  "manufacturer": "samsung",
+  "android_version": "13",
+  "sdk": 33,
+  "hardware": "exynos850",
+  "board": "universal3830"
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/os</span>
+                </div>
+                <p class="endpoint-desc">
+                    Get operating system details including Android version, SDK level, security patch date, build ID, and kernel version.
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "android_version": "13",
+  "sdk": 33,
+  "security_patch": "2024-12-01",
+  "build_id": "TP1A.220624.014",
+  "kernel_version": "5.10.0-android13-123456"
+}</code></pre>
+                </div>
+            </div>
+
+            <h3>⚡ CPU Monitoring</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/cpu</span>
+                </div>
+                <p class="endpoint-desc">
+                    Get CPU architecture information including core count, ABI (Application Binary Interface), and supported architectures.
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "cores": 8,
+  "abi": "arm64-v8a",
+  "abi_list": ["arm64-v8a", "armeabi-v7a"],
+  "arch": "ARMv8"
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/cpu/frequency</span>
+                </div>
+                <p class="endpoint-desc">
+                    Real-time CPU frequency monitoring for each core with comprehensive statistics. 
+                    Returns current frequencies, min/max values, and averages in both kHz and MHz.
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "per_core": {
+    "cpu0": 1800000,
+    "cpu1": 1800000,
+    "cpu2": 1300000,
+    "cpu3": 1300000,
+    "cpu4": 800000,
+    "cpu5": 800000,
+    "cpu6": 546000,
+    "cpu7": 546000
+  },
+  "min_khz": 546000,
+  "max_khz": 1800000,
+  "min_mhz": 546.0,
+  "max_mhz": 1800.0,
+  "avg_mhz": 1173.25,
+  "core_count": 8
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/cpu/governors</span>
+                </div>
+                <p class="endpoint-desc">
+                    Get CPU governor information per core. Governors control CPU frequency scaling behavior 
+                    (e.g., performance, powersave, schedutil).
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "per_core": {
+    "cpu0": "schedutil",
+    "cpu1": "schedutil",
+    "cpu2": "schedutil"
+  },
+  "available_governors": ["schedutil", "performance", "powersave"]
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/cpu/idle</span>
+                </div>
+                <p class="endpoint-desc">
+                    Get CPU idle state statistics showing how much time each core spends in different power-saving states.
+                </p>
+            </div>
+
+            <h3>💾 Memory & Storage</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/memory</span>
+                </div>
+                <p class="endpoint-desc">
+                    Retrieve RAM and swap memory statistics including total, available, used memory with usage percentages.
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "total_mb": 3704.71,
+  "available_mb": 1236.54,
+  "used_mb": 2468.17,
+  "usage_percent": 66.6,
+  "swap_total_mb": 4096.0,
+  "swap_free_mb": 2729.53
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/storage</span>
+                </div>
+                <p class="endpoint-desc">
+                    Get internal storage information for the /data partition showing total, used, and free space in GB.
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "filesystem": "/dev/block/dm-44",
+  "total_gb": 51.35,
+  "used_gb": 15.63,
+  "free_gb": 35.52,
+  "usage_percent": 30.5
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/storage/mounts</span>
+                </div>
+                <p class="endpoint-desc">
+                    Get detailed mount breakdown for all filesystems with size and usage information.
+                </p>
+            </div>
+
+            <h3>🔋 Battery & Power</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/battery</span>
+                </div>
+                <p class="endpoint-desc">
+                    Comprehensive battery information including charge level, health status, temperature, voltage, and charging state.
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "level": 39,
+  "health": "Good",
+  "status": "Charging",
+  "voltage_mv": 3960,
+  "temperature_c": 34.6,
+  "technology": "Li-ion",
+  "is_charging": true
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/power</span>
+                </div>
+                <p class="endpoint-desc">
+                    Power consumption metrics including current draw in milliamps, charge counter, and charging status.
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "current_ma": 1022,
+  "charge_counter": 1865000,
+  "max_charging_current": 0,
+  "charging_status": "discharging"
+}</code></pre>
+                </div>
+            </div>
+
+            <h3>🌡️ Thermal Monitoring</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/thermal</span>
+                </div>
+                <p class="endpoint-desc">
+                    System thermal sensor readings including CPU, battery, and skin temperatures with min/max calculations.
+                </p>
+                <div class="response-example">
+                    <div class="response-label">Response Example:</div>
+                    <pre><code>{
+  "temperatures": {
+    "AP": 39.5,
+    "BAT": 34.6,
+    "SKIN": 35.4
+  },
+  "max_temp_c": 39.5,
+  "min_temp_c": 34.6
+}</code></pre>
+                </div>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/thermal/cores</span>
+                </div>
+                <p class="endpoint-desc">
+                    Per-core CPU temperatures if available from the thermal service.
+                </p>
+            </div>
+
+            <h3>🌐 Network & Display</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/network</span>
+                </div>
+                <p class="endpoint-desc">
+                    Network configuration including hostname, WiFi IP/MAC addresses, carrier information, and data state.
+                </p>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/display</span>
+                </div>
+                <p class="endpoint-desc">
+                    Display metrics including screen resolution and pixel density (DPI).
+                </p>
+            </div>
+
+            <h3>⏱️ System</h3>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/uptime</span>
+                </div>
+                <p class="endpoint-desc">
+                    Device uptime information showing how long the device has been running since last boot.
+                </p>
+            </div>
+
+            <div class="endpoint">
+                <div class="endpoint-header">
+                    <span class="method get">GET</span>
+                    <span class="endpoint-path">/system</span>
+                </div>
+                <p class="endpoint-desc">
+                    <strong>Comprehensive system snapshot</strong> - Returns all metrics in a single request. 
+                    Ideal for dashboards or monitoring applications that need complete device state.
+                </p>
+                <div class="alert alert-info" style="margin-top: 15px;">
+                    <strong>💡 Tip:</strong> This endpoint aggregates data from all other endpoints efficiently 
+                    using parallel execution and caching for optimal performance.
+                </div>
+            </div>
+        </section>
+
+        <!-- Examples -->
+        <section id="examples">
+            <h2>Usage Examples</h2>
+
+            <h3>cURL Examples</h3>
+
+            <div class="code-header">
+                <span class="code-label">Check API Health</span>
+            </div>
+            <pre><code>curl http://localhost:8001/health</code></pre>
+
+            <div class="code-header">
+                <span class="code-label">Get Battery Status</span>
+            </div>
+            <pre><code>curl http://localhost:8001/battery | jq</code></pre>
+
+            <div class="code-header">
+                <span class="code-label">Monitor CPU Frequency</span>
+            </div>
+            <pre><code>curl http://localhost:8001/cpu/frequency | jq</code></pre>
+
+            <div class="code-header">
+                <span class="code-label">Full System Snapshot</span>
+            </div>
+            <pre><code>curl http://localhost:8001/system | jq > device_snapshot.json</code></pre>
+
+            <h3>Python Client Example</h3>
+            <pre><code>import requests
+import json
+
+# Base URL
+BASE_URL = "http://localhost:8001"
+
+# Get battery information
+response = requests.get(f"{BASE_URL}/battery")
+battery_data = response.json()
+
+print(f"Battery Level: {battery_data['level']}%")
+print(f"Temperature: {battery_data['temperature_c']}°C")
+print(f"Status: {battery_data['status']}")
+print(f"Charging: {battery_data['is_charging']}")
+
+# Get CPU frequency
+cpu_freq = requests.get(f"{BASE_URL}/cpu/frequency").json()
+print(f"\nCPU Average Frequency: {cpu_freq['avg_mhz']} MHz")
+print(f"CPU Max Frequency: {cpu_freq['max_mhz']} MHz")
+
+# Get complete system info
+system = requests.get(f"{BASE_URL}/system").json()
+print(f"\nDevice: {system['device']['manufacturer']} {system['device']['model']}")
+print(f"Android Version: {system['os']['android_version']}")
+print(f"Memory Usage: {system['memory']['usage_percent']}%")
+print(f"Storage Usage: {system['storage']['usage_percent']}%")</code></pre>
+
+            <h3>JavaScript/Fetch Example</h3>
+            <pre><code>// Fetch battery data
+fetch('http://localhost:8001/battery')
+  .then(response => response.json())
+  .then(data => {
+    console.log(`Battery: ${data.level}%`);
+    console.log(`Temperature: ${data.temperature_c}°C`);
+    console.log(`Charging: ${data.is_charging}`);
+  })
+  .catch(error => console.error('Error:', error));
+
+// Async/await version
+async function getDeviceMetrics() {
+  try {
+    const [cpu, memory, battery] = await Promise.all([
+      fetch('http://localhost:8001/cpu/frequency').then(r => r.json()),
+      fetch('http://localhost:8001/memory').then(r => r.json()),
+      fetch('http://localhost:8001/battery').then(r => r.json())
+    ]);
+    
+    console.log('CPU Avg:', cpu.avg_mhz, 'MHz');
+    console.log('Memory Usage:', memory.usage_percent, '%');
+    console.log('Battery Level:', battery.level, '%');
+  } catch (error) {
+    console.error('Failed to fetch metrics:', error);
+  }
+}
+
+getDeviceMetrics();</code></pre>
+
+            <h3>Monitoring Script</h3>
+            <pre><code>#!/bin/bash
+# Simple monitoring script
+
+API_URL="http://localhost:8001"
+
+while true; do
+  clear
+  echo "=== Android Device Monitor ==="
+  echo ""
+  
+  # Battery
+  battery=$(curl -s $API_URL/battery)
+  level=$(echo $battery | jq -r '.level')
+  temp=$(echo $battery | jq -r '.temperature_c')
+  echo "🔋 Battery: ${level}% @ ${temp}°C"
+  
+  # Memory
+  memory=$(curl -s $API_URL/memory)
+  mem_usage=$(echo $memory | jq -r '.usage_percent')
+  echo "💾 Memory: ${mem_usage}%"
+  
+  # CPU
+  cpu=$(curl -s $API_URL/cpu/frequency)
+  cpu_avg=$(echo $cpu | jq -r '.avg_mhz')
+  echo "⚡ CPU Avg: ${cpu_avg} MHz"
+  
+  # Thermal
+  thermal=$(curl -s $API_URL/thermal)
+  max_temp=$(echo $thermal | jq -r '.max_temp_c')
+  echo "🌡️  Max Temp: ${max_temp}°C"
+  
+  sleep 2
+done</code></pre>
+        </section>
+
+        <!-- Reference -->
+        <section id="reference">
+            <h2>API Reference</h2>
+
+            <h3>Response Models</h3>
+            <p>All endpoints return JSON with typed Pydantic models. Here are the key data structures:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Endpoint</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>DeviceInfo</code></td>
+                        <td>/device</td>
+                        <td>Device hardware and manufacturer information</td>
+                    </tr>
+                    <tr>
+                        <td><code>OSInfo</code></td>
+                        <td>/os</td>
+                        <td>Operating system and kernel details</td>
+                    </tr>
+                    <tr>
+                        <td><code>CPUInfo</code></td>
+                        <td>/cpu</td>
+                        <td>CPU architecture and core count</td>
+                    </tr>
+                    <tr>
+                        <td><code>CPUFrequency</code></td>
+                        <td>/cpu/frequency</td>
+                        <td>Real-time CPU frequency data</td>
+                    </tr>
+                    <tr>
+                        <td><code>CPUGovernorInfo</code></td>
+                        <td>/cpu/governors</td>
+                        <td>CPU frequency scaling governors</td>
+                    </tr>
+                    <tr>
+                        <td><code>CPUIdleInfo</code></td>
+                        <td>/cpu/idle</td>
+                        <td>CPU idle state statistics</td>
+                    </tr>
+                    <tr>
+                        <td><code>MemoryInfo</code></td>
+                        <td>/memory</td>
+                        <td>RAM and swap usage statistics</td>
+                    </tr>
+                    <tr>
+                        <td><code>StorageInfo</code></td>
+                        <td>/storage</td>
+                        <td>Internal storage capacity and usage</td>
+                    </tr>
+                    <tr>
+                        <td><code>BatteryInfo</code></td>
+                        <td>/battery</td>
+                        <td>Battery health and charging status</td>
+                    </tr>
+                    <tr>
+                        <td><code>PowerInfo</code></td>
+                        <td>/power</td>
+                        <td>Power consumption metrics</td>
+                    </tr>
+                    <tr>
+                        <td><code>ThermalInfo</code></td>
+                        <td>/thermal</td>
+                        <td>System thermal sensor readings</td>
+                    </tr>
+                    <tr>
+                        <td><code>NetworkInfo</code></td>
+                        <td>/network</td>
+                        <td>Network configuration and status</td>
+                    </tr>
+                    <tr>
+                        <td><code>DisplayInfo</code></td>
+                        <td>/display</td>
+                        <td>Screen resolution and density</td>
+                    </tr>
+                    <tr>
+                        <td><code>SystemInfo</code></td>
+                        <td>/system</td>
+                        <td>Complete system snapshot (all metrics)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Error Handling</h3>
+            <p>The API uses standard HTTP status codes:</p>
+            <ul style="line-height: 2; margin: 15px 0 15px 30px;">
+                <li><code>200 OK</code> - Request successful</li>
+                <li><code>500 Internal Server Error</code> - ADB command failed or parsing error</li>
+                <li><code>503 Service Unavailable</code> - ADB not connected or device offline</li>
+            </ul>
+
+            <div class="code-header">
+                <span class="code-label">Error Response Example</span>
+            </div>
+            <pre><code>{
+  "detail": "ADB command failed: device offline",
+  "error": "ADB Error"
+}</code></pre>
+
+            <h3>Caching</h3>
+            <p>
+                The API implements intelligent caching to reduce ADB overhead. Static data (device info, OS version) 
+                is cached for 5 minutes, while dynamic data (battery, CPU frequency) is fetched in real-time or cached 
+                for 30 seconds. You can see cache TTL values in the implementation.
+            </p>
+
+            <h3>CORS Support</h3>
+            <p>
+                CORS is enabled for all origins, making it easy to integrate with web-based dashboards and monitoring tools.
+            </p>
+
+            <h3>OpenAPI Schema</h3>
+            <p>
+                Full OpenAPI 3.0 schema is available at:
+            </p>
+            <ul style="line-height: 2; margin: 15px 0 15px 30px;">
+                <li><code>/openapi.json</code> - Machine-readable OpenAPI schema</li>
+                <li><code>/docs</code> - Interactive Swagger UI</li>
+                <li><code>/redoc</code> - Alternative ReDoc documentation</li>
+            </ul>
+
+            <h3>C++ Implementation</h3>
+            <p>
+                A high-performance C++ version is also available using cpp-httplib. Build instructions:
+            </p>
+            <pre><code>cd Cpp/build
+cmake ..
+make
+./adb_insight</code></pre>
+
+            <h3>Rate Limiting</h3>
+            <p>
+                No built-in rate limiting is implemented. For production use, consider adding rate limiting 
+                middleware or deploying behind a reverse proxy with rate limiting capabilities.
+            </p>
+        </section>
+
+        <!-- Advanced Usage -->
+        <section>
+            <h2>Advanced Usage</h2>
+
+            <h3>Building a Dashboard</h3>
+            <p>
+                DroidMetrics is perfect for building real-time monitoring dashboards. Here's a simple HTML dashboard example:
+            </p>
+            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Device Dashboard&lt;/title&gt;
+  &lt;style&gt;
+    .metric { margin: 20px; padding: 20px; border: 1px solid #ddd; }
+    .metric h3 { margin: 0; }
+    .value { font-size: 2em; color: #4F46E5; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Android Device Dashboard&lt;/h1&gt;
+  &lt;div id="dashboard"&gt;&lt;/div&gt;
+
+  &lt;script&gt;
+    async function updateDashboard() {
+      const data = await fetch('http://localhost:8001/system').then(r =&gt; r.json());
+      
+      document.getElementById('dashboard').innerHTML = `
+        &lt;div class="metric"&gt;
+          &lt;h3&gt;Battery&lt;/h3&gt;
+          &lt;div class="value"&gt;${data.battery.level}%&lt;/div&gt;
+          &lt;div&gt;${data.battery.temperature_c}°C&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="metric"&gt;
+          &lt;h3&gt;Memory&lt;/h3&gt;
+          &lt;div class="value"&gt;${data.memory.usage_percent}%&lt;/div&gt;
+          &lt;div&gt;${data.memory.used_mb.toFixed(0)} / ${data.memory.total_mb.toFixed(0)} MB&lt;/div&gt;
+        &lt;/div&gt;
+        &lt;div class="metric"&gt;
+          &lt;h3&gt;CPU&lt;/h3&gt;
+          &lt;div class="value"&gt;${data.cpu_frequency.avg_mhz} MHz&lt;/div&gt;
+          &lt;div&gt;${data.cpu.cores} cores&lt;/div&gt;
+        &lt;/div&gt;
+      `;
+    }
+
+    updateDashboard();
+    setInterval(updateDashboard, 2000);  // Update every 2 seconds
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+            <h3>Integration with Monitoring Tools</h3>
+            <p>
+                DroidMetrics can be integrated with popular monitoring stacks:
+            </p>
+            <ul style="line-height: 2; margin: 15px 0 15px 30px;">
+                <li><strong>Prometheus:</strong> Create an exporter that polls DroidMetrics endpoints</li>
+                <li><strong>Grafana:</strong> Use the JSON API datasource to visualize metrics</li>
+                <li><strong>InfluxDB:</strong> Write a bridge script to store metrics time-series data</li>
+                <li><strong>Home Assistant:</strong> Create custom sensors using REST platform</li>
+            </ul>
+
+            <h3>Running in Production</h3>
+            <div class="alert alert-warning">
+                <strong>Production Deployment Tips:</strong>
+                <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                    <li>Use a production ASGI server like Gunicorn with Uvicorn workers</li>
+                    <li>Set up reverse proxy (nginx/Apache) for SSL and rate limiting</li>
+                    <li>Configure firewall rules to restrict access</li>
+                    <li>Consider authentication middleware for sensitive deployments</li>
+                    <li>Monitor ADB connection stability and implement auto-reconnection</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p>DroidMetrics v2.0.0 by <strong>bluecape</strong></p>
+            <p style="margin-top: 10px; opacity: 0.8;">
+                Real-time Android monitoring made simple. No root. No app. Just metrics.
+            </p>
+            <p style="margin-top: 20px; font-size: 0.9rem;">
+                <a href="https://github.com/yourusername/DroidMetrics">View on GitHub</a> | 
+                <a href="http://localhost:8001/docs">Interactive API Docs</a> | 
+                <a href="http://localhost:8001/redoc">ReDoc</a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('nav a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Copy to clipboard functionality
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const code = this.parentElement.nextElementSibling.querySelector('code');
+                navigator.clipboard.writeText(code.textContent);
+                this.textContent = 'Copied!';
+                setTimeout(() => this.textContent = 'Copy', 2000);
+            });
+        });
+    </script>
+</body>
+</html>
