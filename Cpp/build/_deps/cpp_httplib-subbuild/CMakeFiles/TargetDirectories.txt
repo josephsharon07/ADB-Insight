@@ -1,3 +1,0 @@
-/home/sharon/Documents/Applications/ADB-Insight/Cpp/build/_deps/cpp_httplib-subbuild/CMakeFiles/cpp_httplib-populate.dir
-/home/sharon/Documents/Applications/ADB-Insight/Cpp/build/_deps/cpp_httplib-subbuild/CMakeFiles/edit_cache.dir
-/home/sharon/Documents/Applications/ADB-Insight/Cpp/build/_deps/cpp_httplib-subbuild/CMakeFiles/rebuild_cache.dir

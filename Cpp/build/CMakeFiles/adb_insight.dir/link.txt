@@ -1,1 +1,0 @@
-/usr/bin/c++ CMakeFiles/adb_insight.dir/src/main.cpp.o CMakeFiles/adb_insight.dir/src/adb_utils.cpp.o CMakeFiles/adb_insight.dir/src/parsers.cpp.o -o adb_insight 
